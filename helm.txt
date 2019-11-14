@@ -1,0 +1,174 @@
+HELM 
+
+
+https://docs.bitnami.com/kubernetes/how-to/create-your-first-helm-chart/
+https://helm.sh/docs/intro/quickstart/
+
+
+-----Helm Installation:
+
+Can be done on any linux/ubuntu server using these 3 commands below
+
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > get_helm.sh
+chmod 700 get_helm.sh
+./get_helm.sh
+
+kubectl must be installed before using helm
+
+-----Kubectl Installation
+
+curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+kubectl version
+
+To create a chart "helm create <chart-name>" command can be used
+Eg. "helm create mychart" means a repo will be created on the name of mychart like this:
+
+mychart
+|-- Chart.yaml
+|-- charts
+|-- templates
+|   |-- NOTES.txt
+|   |-- _helpers.tpl
+|   |-- deployment.yaml
+|   |-- ingress.yaml
+|   `-- service.yaml
+`-- values.yaml
+
+values.yaml,deployment.yaml,service.yaml files are to be edited based on requirement
+
+------------------The values.yaml file used for flask application is ------------------------------------------
+
+replicaCount: 1
+
+image:
+ repository: gcr.io/disney-218910/flask-build:1.0
+ pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  service:
+  type: LoadBalancer
+  port: 8086
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+---------------------The deployment.yaml file used for flask application is------------------------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mychart.fullname" . }}
+  labels:
+    {{- include "mychart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "mychart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mychart.selectorLabels" . | nindent 8 }}
+    spec:
+
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8086
+              protocol: TCP
+			  
+-----------------------The service.yaml file used for flask application is-----------------------------------
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: flaskapplication
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "flaskapp.selectorLabels" . | nindent 4 }}
+
+-------------------------------------------------------------------------------------------------------------	
+			  
+
+helm install --generate-name ./mychart (Here mychart is the name of the chart which is created)
+ OR
+helm install < name of helm release> ./<chart-name>
+  
+-------------------------------------------------------------------------------------------------------------
+
+To delete a helm release the command is:
+
+helm uninstall <name of helm release>
+
+-------------------------------------------------------------------------------------------------------------
+
+helm update command can be used if any changes are done in templates or other files and 
+those changes to be reflected in all deployments and services
+
+---------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
