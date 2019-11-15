@@ -6,7 +6,7 @@ https://helm.sh/docs/intro/quickstart/
 https://medium.com/faun/standardising-deployment-patterns-using-helm-chart-2c2b7a592b19
 
 
------Helm Installation:
+-----Helm Installation----------------------------------------------------------------------------------------
 
 Can be done on any linux/ubuntu server using these 3 commands below
 
@@ -16,12 +16,13 @@ chmod 700 get_helm.sh
 
 kubectl must be installed before using helm
 
------Kubectl Installation
+-----Kubectl Installation---------------------------------------------------------------------------------------
 
 curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
 chmod +x ./kubectl
 sudo mv ./kubectl /usr/local/bin/kubectl
 kubectl version
+-----------------------------------------------------------------------------------------------------------------
 
 To create a chart "helm create <chart-name>" command can be used
 Eg. "helm create mychart" means a repo will be created on the name of mychart like this:
