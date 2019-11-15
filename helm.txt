@@ -3,6 +3,7 @@ HELM
 
 https://docs.bitnami.com/kubernetes/how-to/create-your-first-helm-chart/
 https://helm.sh/docs/intro/quickstart/
+https://medium.com/faun/standardising-deployment-patterns-using-helm-chart-2c2b7a592b19
 
 
 -----Helm Installation:
@@ -36,7 +37,8 @@ mychart
 |   `-- service.yaml
 `-- values.yaml
 
-values.yaml,deployment.yaml,service.yaml files are to be edited based on requirement
+values.yaml,deployment.yaml,service.yaml files are to be edited based on requirement.
+The other files need not be edited.
 
 ------------------The values.yaml file used for flask application is ------------------------------------------
 
