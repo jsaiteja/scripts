@@ -1,7 +1,7 @@
 node{
     def project = 'disney-218910'
-    def appName = 'flask-build'
-    def imageTag = "gcr.io/${project}/${appName}:2.0"
+    def appName = 'flask-app'
+    def imageTag = "gcr.io/${project}/${appName}:latest"
     def external_ip=""
     stage('scm checkout')
     {
@@ -64,13 +64,16 @@ node{
     {
       sh "gcloud docker -- push ${imageTag}"
     }
-    stage('deploying to kubernetes cluster')
-    {
+    // stage('deploying to kubernetes cluster')
+    // {
       
-      sh "gcloud container clusters get-credentials standard-cluster-2 --zone us-east1-b --project disney-218910"
-      sh "kubectl create -f deployment.yaml"
-      sh "kubectl create -f service.yaml"
-      sh "kubectl get service"
+    //   sh "gcloud container clusters get-credentials standard-cluster-2 --zone us-east1-b --project disney-218910"
+    //   sh "kubectl create -f deployment.yaml"
+    //   sh "kubectl create -f service.yaml"
+    //   sh "kubectl get service"
+    // }
+    stage("deployment to k8's using Helm"){
+        sh("/usr/local/bin/helm install flaskapplication $WORKSPACE/helm/flaskapp")
     }
     stage('Fetching the endpoint'){
 
@@ -95,10 +98,11 @@ node{
         sh "python3 health_check.py server.txt"
     }
     stage('Publish Reports by Email'){
-            emailext attachmentsPattern: 'pylintresults.txt , testcoverage.txt, loadtest_requests.csv',body: '''Please find build url for checking logs$BUILD_URL''',
+        emailext attachLog: true,
+        attachmentsPattern: 'pylintresults.txt , testcoverage.txt, loadtest_requests.csv',body: '''Please find build url for checking logs$BUILD_URL''',
         recipientProviders: [developers()],
         subject: 'jenkins build reports',
-        to: 'saiteja.jayanthi@quantiphi.com'
+        to: 'saiteja.jayanthi@quantiphi.com,ci-cd@quantiphi.com'
 
     }
 }    
